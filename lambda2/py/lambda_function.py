@@ -35,6 +35,7 @@ from ask_sdk_model import (
 from ask_sdk_model.ui import simple_card, SimpleCard
 from ask_sdk_model.dialog import ElicitSlotDirective, DelegateDirective
 
+from .alexa import data, cards
 
 # Skill builder object
 
@@ -44,11 +45,18 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+# start game
+
+deck = cards.Deck()
+deck.shuffle()
+
+
 @sb.request_handler(can_handle_func=is_request_type("LaunchRequest"))
 def launch_request_handler(handler_input):
-    """Handler for Skill Launch."""
+    """Handler for Skill Launch.
+     Set session attributes for the game"""
     # type: (HandlerInput) -> Response
-    speech_text = "Welcome to the Alexa Skills Kit, you can say hello!"
+    speech_text = data.WELCOME
 
     return (
         handler_input.response_builder.speak(speech_text)
