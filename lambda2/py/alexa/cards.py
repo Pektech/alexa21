@@ -83,6 +83,12 @@ class Hand:
             hand_held += card.__str__() + ", "
         return hand_held
 
+    def holding(self):
+        cards_held = []
+        for card in self.cards:
+            cards_held.append(card.__str__())
+        return cards_held
+
     def adjust_for_ace(self):
         while self.value > 21 and self.aces:
             self.value -= 10
