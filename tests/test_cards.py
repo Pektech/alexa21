@@ -34,7 +34,7 @@ def test_multiple_deck():
 
 
 def test_hand(fake_card, capsys):
-
+    """test that hand displays correctly"""
     test_hand = cards.Hand()
     test_hand.add_cards(fake_card)
     print(test_hand)
@@ -42,17 +42,79 @@ def test_hand(fake_card, capsys):
     assert captured.out == "King of Diamonds, \n"
 
 
-@pytest.mark.parametrize(
-    "next_suit, next_rank, expected",
-    [
-        ("Diamonds", "King", 10),
-        ("Hearts", "Ace", 21),
-        ("Spades", "Eight", 29),
-        ("Clubs", "Ace", 30),
-    ],
-)
-def test_add_cards(next_suit, next_rank, expected):
+def test_add_cards1():
+    """Adding cards to hand gives correct hand value"""
     test_hand = cards.Hand()
 
-    test_hand.add_cards(cards.Card(next_suit, next_rank))
-    assert test_hand.value == expected
+    test_hand.add_cards(cards.Card("Diamonds", "King"))
+    assert test_hand.value == 10
+    assert test_hand.aces == 0
+
+
+def test_add_cards2():
+    """Next 5 tests are checking aces are handled correctly"""
+    test_hand = cards.Hand()
+    test_hand.add_cards(cards.Card("Diamonds", "King"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    test_hand.adjust_for_ace()
+
+    assert test_hand.value == 21
+    assert test_hand.aces == 1
+
+
+def test_add_cards3():
+    test_hand = cards.Hand()
+    test_hand.add_cards(cards.Card("Diamonds", "King"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Spades", "Eight"))
+    test_hand.adjust_for_ace()
+
+    assert test_hand.value == 19
+    assert test_hand.aces == 0
+
+
+def test_add_cards4():
+    test_hand = cards.Hand()
+    test_hand.add_cards(cards.Card("Diamonds", "King"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Spades", "Eight"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Clubs", "Ace"))
+    test_hand.adjust_for_ace()
+
+    assert test_hand.value == 20
+    assert test_hand.aces == 0
+
+
+def test_add_cards5():
+    test_hand = cards.Hand()
+
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    test_hand.adjust_for_ace()
+
+    test_hand.add_cards(cards.Card("Clubs", "Ace"))
+    test_hand.adjust_for_ace()
+
+    assert test_hand.value == 12
+    assert test_hand.aces == 1
+
+
+def test_add_cards6():
+    test_hand = cards.Hand()
+
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    test_hand.adjust_for_ace()
+
+    test_hand.add_cards(cards.Card("Clubs", "Ace"))
+    test_hand.adjust_for_ace()
+
+    test_hand.add_cards(cards.Card("Clubs", "Ace"))
+    test_hand.adjust_for_ace()
+
+    assert test_hand.value == 13
+    assert test_hand.aces == 1
