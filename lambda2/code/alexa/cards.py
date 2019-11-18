@@ -45,11 +45,13 @@ class Card:
 
 
 class Deck:
-    def __init__(self):
+    def __init__(self, decks=1):
         self.deck = []
+        self.decks = decks
         for suit in suits:
             for rank in ranks:
                 self.deck.append(Card(suit, rank))
+        self.deck = self.deck * decks
 
     def __str__(self):
         deck_comp = ""
