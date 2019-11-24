@@ -44,7 +44,8 @@ sb = SkillBuilder()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 # request handlers launch bstython with bstpy lambda2.py.lambda_function.handler
-
+deck = cards.Deck()
+deck.shuffle()
 # start game
 
 
@@ -55,8 +56,7 @@ def launch_request_handler(handler_input):
     # type: (HandlerInput) -> Response
     # set up deck and initial hand
     player_chips = cards.Chips()
-    deck = cards.Deck()
-    deck.shuffle()
+    global deck
     alexa_hand = cards.Hand()
     player_hand = cards.Hand()
     player_hand.add_cards(deck.deal())
@@ -81,7 +81,7 @@ def launch_request_handler(handler_input):
     )
 
 
-@sb.request_handler(can_handle_func=lambda handler_input: is_intent_name("ReadyGame"))
+@sb.request_handler(can_handle_func=is_intent_name("ReadyGame"))
 def start_game(handler_input):
     game_session_attr = handler_input.attributes_manager.session_attributes
     game_session_attr["GAME_STATE"] = "RUNNING"
@@ -101,17 +101,29 @@ def start_game(handler_input):
 # this intent handles the bet and has a required slot
 
 
-@sb.request_handler(can_handle_func=lambda handler_input: is_intent_name("Betting"))
+@sb.request_handler(can_handle_func=is_intent_name("Betting"))
 def bet_handler(handler_input):
     # handles that a bet has been set and remembers amount
     # current_intent gets details about returned intent for checking use .name,
     # .slots etc
-    print("starting bet")
-    current_intent = handler_input.request_envelope.request.intent
     game_session_attr = handler_input.attributes_manager.session_attributes
-    logger.info("In BetHandler")
-    output = f"current intent is {current_intent},  game session is {game_session_attr}"
+    slots = handler_input.request_envelope.request.intent.slots
+    bet = slots["amount"].value
+    game_session_attr["GAME_STATE"] = "RUNNING"
+    player_hand = game_session_attr["PLAYER"]
+    alexa_hand = game_session_attr["ALEXA"]
+
+    output = f"""Okay you bet {bet}. You have 
+        {player_hand[0]} and a {player_hand[1]}. I have a {alexa_hand[1]} 
+        showing. What you like to  Hit or Stand?"""
+
     return handler_input.response_builder.speak(output).response
+
+
+@sb.request_handler(can_handle_func=is_intent_name("Hit"))
+def play_handler(handler_input):
+    game_session_attr = handler_input.attributes_manager.session_attributes
+    pass
 
 
 handler = sb.lambda_handler()

@@ -75,9 +75,10 @@ class Hand:
 
     def add_cards(self, card):
         self.cards.append(card)
-        self.value += values[card.rank]
         if card.rank == "Ace":
             self.aces += 1
+        self.value += values[card.rank]
+        self.adjust_for_ace()
 
     def __str__(self):
         hand_held = ""
