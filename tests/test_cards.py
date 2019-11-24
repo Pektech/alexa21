@@ -118,3 +118,11 @@ def test_add_cards6():
 
     assert test_hand.value == 13
     assert test_hand.aces == 1
+
+
+def test_deal(capsys):
+    deck = cards.Deck()
+    test_hit = deck.deal()
+    print(test_hit)
+    captured = capsys.readouterr()
+    assert captured.out == "Ace of Clubs\n"
