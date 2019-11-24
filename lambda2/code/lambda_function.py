@@ -123,6 +123,10 @@ def bet_handler(handler_input):
 @sb.request_handler(can_handle_func=is_intent_name("Hit"))
 def play_handler(handler_input):
     game_session_attr = handler_input.attributes_manager.session_attributes
+    # add card to player hand
+    # check if bust
+    # ask hit or stand. if stand deal cards to alexa
+
     pass
 
 
