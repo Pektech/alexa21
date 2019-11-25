@@ -75,6 +75,7 @@ def launch_request_handler(handler_input):
         game_session_attr["last_speech"] = speech_text
     return (
         handler_input.response_builder.speak(speech_text)
+        .ask(game_session_attr["last_speech"])
         .set_card(SimpleCard("Simple 21", speech_text))
         .set_should_end_session(False)
         .response
@@ -88,7 +89,7 @@ def start_game(handler_input):
     player_hand = game_session_attr["PLAYER"]
     alexa_hand = game_session_attr["ALEXA"]
     output = f"""Now we can start the game. I'll deal. You have {player_hand[0]} and a {player_hand[1]}.
-    I have a {alexa_hand[1]} showing. how much would you like to bet"""
+    I have a {alexa_hand[1]} showing. how much would you like to bet?"""
     # handler_input.response_builder.add_directive(
     #     DelegateDirective(updated_intent=Intent(name='Betting')))
     return (
@@ -104,7 +105,7 @@ def start_game(handler_input):
 @sb.request_handler(can_handle_func=is_intent_name("Betting"))
 def bet_handler(handler_input):
     # handles that a bet has been set and remembers amount
-    # current_intent gets details about returned intent for checking use .name,
+    # current_intent gets details about returned intent for checking use .name
     # .slots etc
     game_session_attr = handler_input.attributes_manager.session_attributes
     slots = handler_input.request_envelope.request.intent.slots
@@ -113,11 +114,13 @@ def bet_handler(handler_input):
     player_hand = game_session_attr["PLAYER"]
     alexa_hand = game_session_attr["ALEXA"]
 
-    output = f"""Okay you bet {bet}. You have 
-        {player_hand[0]} and a {player_hand[1]}. I have a {alexa_hand[1]} 
-        showing. What you like to  Hit or Stand?"""
+    output = f"""Okay you bet {bet}. You have {player_hand[0]} and a {player_hand[1]}. I have a {alexa_hand[1]} showing. What you like to  Hit or Stand?"""
 
-    return handler_input.response_builder.speak(output).response
+    return (
+        handler_input.response_builder.speak(output)
+        .set_should_end_session(False)
+        .response
+    )
 
 
 @sb.request_handler(can_handle_func=is_intent_name("Hit"))
