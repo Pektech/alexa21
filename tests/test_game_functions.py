@@ -13,22 +13,29 @@ def test_hit(capsys):
     assert test_hand.value == 21
 
 
-def test_IsBust(capsys):
+def test_isbust(capsys):
     hand = cards.Hand()
 
     hand.add_cards(cards.Card("Clubs", "Ten"))
     print(hand.value)
 
-    assert game_functions.IsBust(hand) is False
+    assert game_functions.isbust(hand) is False
     hand.add_cards(cards.Card("Clubs", "Eight"))
     print(hand.value)
 
-    assert game_functions.IsBust(hand) is False
+    assert game_functions.isbust(hand) is False
     hand.add_cards(cards.Card("Clubs", "Ace"))
     print(hand.value)
 
-    assert game_functions.IsBust(hand) is False
+    assert game_functions.isbust(hand) is False
     hand.add_cards(cards.Card("Clubs", "Four"))
     print(hand.value)
 
-    assert game_functions.IsBust(hand) is True
+    assert game_functions.isbust(hand) is True
+
+
+def test_player_loses_bet():
+
+    chips = 100
+    bet = 10
+    assert chips - bet == game_functions.player_loses_bet(bet, chips)

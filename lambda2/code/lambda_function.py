@@ -35,7 +35,7 @@ from ask_sdk_model import (
 from ask_sdk_model.ui import simple_card, SimpleCard
 from ask_sdk_model.dialog import ElicitSlotDirective, DelegateDirective
 
-from .alexa import data, cards
+from .alexa import data, cards, game_functions
 
 # Skill builder object
 
@@ -55,21 +55,22 @@ def launch_request_handler(handler_input):
      """
     # type: (HandlerInput) -> Response
     # set up deck and initial hand
-    player_chips = cards.Chips()
-    global deck
-    alexa_hand = cards.Hand()
-    player_hand = cards.Hand()
-    player_hand.add_cards(deck.deal())
-    alexa_hand.add_cards(deck.deal())
-    player_hand.add_cards(deck.deal())
-    alexa_hand.add_cards(deck.deal())
+    player_chips = 100
+    player_hand, alexa_hand = cards.Hand().create_initial_hand()
+    # global deck
+    # alexa_hand = cards.Hand()
+    # player_hand = cards.Hand()
+    # player_hand.add_cards(deck.deal())
+    # alexa_hand.add_cards(deck.deal())
+    # player_hand.add_cards(deck.deal())
+    # alexa_hand.add_cards(deck.deal())
 
     speech_text = data.WELCOME
     # Set session attributes for the game
     game_session_attr = handler_input.attributes_manager.session_attributes
     if not game_session_attr:
         game_session_attr["GAME_STATE"] = 0
-        game_session_attr["CHIPS"] = player_chips.total
+        game_session_attr["CHIPS"] = player_chips
         game_session_attr["ALEXA"] = alexa_hand.holding()
         game_session_attr["PLAYER"] = player_hand.holding()
         game_session_attr["last_speech"] = speech_text
@@ -87,6 +88,7 @@ def start_game(handler_input):
     game_session_attr = handler_input.attributes_manager.session_attributes
     game_session_attr["GAME_STATE"] = "RUNNING"
     player_hand = game_session_attr["PLAYER"]
+
     alexa_hand = game_session_attr["ALEXA"]
     output = f"""Now we can start the game. I'll deal. You have {player_hand[0]} and a {player_hand[1]}.
     I have a {alexa_hand[1]} showing. how much would you like to bet?"""
@@ -109,7 +111,9 @@ def bet_handler(handler_input):
     # .slots etc
     game_session_attr = handler_input.attributes_manager.session_attributes
     slots = handler_input.request_envelope.request.intent.slots
+
     bet = slots["amount"].value
+
     game_session_attr["GAME_STATE"] = "RUNNING"
     player_hand = game_session_attr["PLAYER"]
     alexa_hand = game_session_attr["ALEXA"]
@@ -126,11 +130,21 @@ def bet_handler(handler_input):
 @sb.request_handler(can_handle_func=is_intent_name("Hit"))
 def play_handler(handler_input):
     game_session_attr = handler_input.attributes_manager.session_attributes
+    player_hand = game_session_attr["PLAYER"]
+    global deck
     # add card to player hand
-    # check if bust
-    # ask hit or stand. if stand deal cards to alexa
+    game_functions.hit(deck, player_hand)
 
-    pass
+    # check if bust
+    if not game_functions.isbust(player_hand):
+        current_hand = player_hand.holding()
+        output = f""" You have {' '.join(card for card in current_hand)}"""
+        return (
+            handler_input.response_builder.speak(output)
+            .set_should_end_session(False)
+            .response
+        )
+    # ask hit or stand. if stand deal cards to alexa
 
 
 handler = sb.lambda_handler()

@@ -80,16 +80,22 @@ class Hand:
         self.value += values[card.rank]
         self.adjust_for_ace()
 
-    def __str__(self):
+    def hand_held(self):
         hand_held = ""
-        for card in self.cards:
-            hand_held += card.__str__() + ", "
+        hand_list = self.holding()
+        if len(hand_list) == 1:
+            hand_held = hand_list[0][1] + " of " + hand_list[0][0]
+            return hand_held
+        else:
+            for card in hand_list[:-1]:
+                hand_held += card[1] + " of " + card[0] + ", "
+            hand_held += "and the " + hand_list[-1][1] + " of " + hand_list[-1][0]
         return hand_held
 
     def holding(self):
         cards_held = []
         for card in self.cards:
-            cards_held.append(card.__str__())
+            cards_held.append((card.suit, card.rank))
         return cards_held
 
     def adjust_for_ace(self):
@@ -97,14 +103,26 @@ class Hand:
             self.value -= 10
             self.aces -= 1
 
+    def create_initial_hand(self) -> object:
+        player_hand = Hand()
+        alexa_hand = Hand()
+        game_deck = Deck()
+        game_deck.shuffle()
+        player_hand.add_cards(game_deck.deal())
+        alexa_hand.add_cards(game_deck.deal())
+        player_hand.add_cards(game_deck.deal())
+        alexa_hand.add_cards(game_deck.deal())
+        return player_hand, alexa_hand
 
-class Chips:
-    def __init__(self):
-        self.total = 100
-        self.bet = 0
 
-    def win_bet(self):
-        self.total += self.bet
-
-    def lose_bet(self):
-        self.total -= self.bet
+# dont think chips really need to be an object for this
+# class Chips:
+#     def __init__(self):
+#         self.total = 100
+#         self.bet = 0
+#
+#     def win_bet(self):
+#         self.total += self.bet
+#
+#     def lose_bet(self):
+#         self.total -= self.bet

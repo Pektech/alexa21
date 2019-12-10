@@ -33,6 +33,30 @@ def test_launch_request():
     )
 
 
+@pytest.mark.xfail(raises=AssertionError)
+def test_session_ready_game_speach():
+    """Tests the SessionAttributeValidator"""
+    alexa_test = AlexaTest(handler)
+    alexa_test.test(
+        [
+            _TestItem(
+                IntentRequestBuilder("ReadyGame", skill_settings).build(),
+                expected_speech=(
+                    """Now we can start the game. I'll deal. You have Ace and a King.
+    I have a Five showing. how much would you like to bet?""",
+                    True,
+                ),
+                should_end_session=False,
+                session_attributes={
+                    "PLAYER": ["Ten of Spades", "Ace of Spades"],
+                    "ALEXA": ["King of Diamonds", "Queen of Hearts"],
+                },
+                expected_attributes={"PLAYER": ["Ten of Spades", "Ace of Spades"]},
+            )
+        ]
+    )
+
+
 def test_session_attribute_validator():
     """Tests the SessionAttributeValidator"""
     alexa_test = AlexaTest(handler)
@@ -45,7 +69,7 @@ def test_session_attribute_validator():
                     "PLAYER": ["Ten of Spades", "Ace of Spades"],
                     "ALEXA": ["King of Diamonds", "Queen of Hearts"],
                 },
-                expected_attributes={"GAME_STATE": "RUNNING"},
+                expected_attributes={"PLAYER": ["Ten of Spades", "Ace of Spades"]},
             )
         ]
     )
@@ -65,7 +89,30 @@ def test_session_attribute_Betting():
                     "PLAYER": ["Ten of Spades", "Ace of Spades"],
                     "ALEXA": ["King of Diamonds", "Queen of Hearts"],
                 },
-                expected_speech=f"""Okay you bet 10. You have Ten of Spades and a Ace of Spades. I have a Queen of Hearts showing. What you like to  Hit or Stand?""",
+                expected_speech=speach_for_tests.BETTING
+                # expected_speech=f"""Okay you bet 10. You have Ten of Spades and a Ace of Spades. I have a Queen of Hearts showing. What you like to  Hit or Stand?""",
+            )
+        ]
+    )
+
+
+def test_hit_intent():
+    alexa_test = AlexaTest(handler)
+    alexa_test.test(
+        [
+            _TestItem(
+                IntentRequestBuilder("Hit", skill_settings)
+                .with_slot("amount", 10)
+                .build(),
+                should_end_session=False,
+                session_attributes={
+                    "PLAYER": ["Ten of Spades"],
+                    "ALEXA": ["King of Diamonds", "Queen of Hearts"],
+                },
+                expected_speech=speach_for_tests.BETTING
+                # expected_speech=f"""Okay you bet 10. You have Ten of
+                # Spades and a Ace of Spades. I have a Queen of Hearts
+                # showing. What you like to  Hit or Stand?""",
             )
         ]
     )
