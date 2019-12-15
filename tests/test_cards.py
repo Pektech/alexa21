@@ -37,9 +37,7 @@ def test_hand(fake_card, capsys):
     """test that hand displays correctly"""
     test_hand = cards.Hand()
     test_hand.add_cards(fake_card)
-    print(test_hand)
-    captured = capsys.readouterr()
-    assert captured.out == "King of Diamonds, \n"
+    assert test_hand.hand_held() == "King of Diamonds"
 
 
 def test_add_cards1():
@@ -126,3 +124,48 @@ def test_deal(capsys):
     print(test_hit)
     captured = capsys.readouterr()
     assert captured.out == "Ace of Clubs\n"
+
+
+def test_holding():
+    test_hand = cards.Hand()
+    test_hand.add_cards(cards.Card("Diamonds", "King"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    test_hand.adjust_for_ace()
+    test_hand.add_cards(cards.Card("Spades", "Eight"))
+    test_hand.adjust_for_ace()
+    assert test_hand.holding() == [
+        ("Diamonds", "King"),
+        ("Hearts", "Ace"),
+        ("Spades", "Eight"),
+    ]
+    assert test_hand.cards[0].rank == "King"
+
+
+@pytest.mark.skip("not working yet")
+def test_converting_list_to_object():
+    test_hand = cards.Hand()
+    test_alexa_session_attr = ["King of Diamonds", "Ace of Hearts", "Eight of Spades"]
+    pass
+
+
+def test_card_string():
+    test_hand = cards.Hand()
+    test_hand.add_cards(cards.Card("Diamonds", "King"))
+    test_hand.adjust_for_ace()
+    assert test_hand.hand_held() == "King of Diamonds"
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    test_hand.adjust_for_ace()
+    assert test_hand.hand_held() == "King of Diamonds, and the Ace of Hearts"
+    test_hand.add_cards(cards.Card("Spades", "Eight"))
+    test_hand.adjust_for_ace()
+    assert (
+        test_hand.hand_held()
+        == "King of Diamonds, Ace of Hearts, and the Eight of Spades"
+    )
+
+
+def test_create_initial_hands():
+    test_player, test_alexa = cards.Hand().create_initial_hand()
+    print(test_player.hand_held(), test_alexa.hand_held())
+    assert test_player != test_alexa

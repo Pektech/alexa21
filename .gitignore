@@ -5,3 +5,4 @@ zappa_settings.json
 test.py
 scratch_4.py
 /node_modules/
+tests/test_config.py
