@@ -89,9 +89,9 @@ def start_game(handler_input):
     # player_hand = game_session_attr["PLAYER"]
 
     p_hand = player_hand.hand_held()
-    a_hand = alexa_hand.hand_held()
+    a_hand = alexa_hand.holding()
     output = f"""Now we can start the game. I'll deal. You have {p_hand}.
-    I have a {a_hand[1]} showing. how much would you like to bet?"""
+    I have a {a_hand[1][1]} of {a_hand[1][0]} showing. how much would you like to bet?"""
     # handler_input.response_builder.add_directive(
     #     DelegateDirective(updated_intent=Intent(name='Betting')))
     return (
@@ -176,7 +176,10 @@ def stand_handler(handler_input):
         directive_service_client.enqueue(directive_request)
 
         print(output)
-    bust = "Bust"
+    # if alexa is less than player, player wins, add winnings, draw new cards
+    # if alexa higher than player, alexa wins, subtract bet, draw new cards
+    # if draw then deal new cards
+    bust = f"""My cards value is {alexa_hand.value} so I have bust"""
     handler_input.response_builder.speak(bust)
 
     return handler_input.response_builder.set_should_end_session(False).response
