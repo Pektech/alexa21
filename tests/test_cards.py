@@ -37,9 +37,7 @@ def test_hand(fake_card, capsys):
     """test that hand displays correctly"""
     test_hand = cards.Hand()
     test_hand.add_cards(fake_card)
-    print(test_hand)
-    captured = capsys.readouterr()
-    assert captured.out == "King of Diamonds, \n"
+    assert test_hand.hand_held() == "King of Diamonds"
 
 
 def test_add_cards1():

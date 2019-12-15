@@ -112,7 +112,12 @@ class Hand:
         alexa_hand.add_cards(game_deck.deal())
         player_hand.add_cards(game_deck.deal())
         alexa_hand.add_cards(game_deck.deal())
-        return player_hand, alexa_hand
+        return player_hand, alexa_hand, game_deck
+
+    def hit(self, game_deck):
+        card = game_deck.deal()
+        self.add_cards(Card(card.suit, card.rank))
+        return self
 
 
 # dont think chips really need to be an object for this
