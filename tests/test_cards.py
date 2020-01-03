@@ -1,5 +1,6 @@
 import pytest
 from lambda2.code.alexa import cards
+from lambda2.code import game_set_up as gm
 
 
 @pytest.fixture
@@ -166,6 +167,6 @@ def test_card_string():
 
 
 def test_create_initial_hands():
-    test_player, test_alexa = cards.Hand().create_initial_hand()
+    test_player, test_alexa = gm.player_hand, gm.alexa_hand
     print(test_player.hand_held(), test_alexa.hand_held())
     assert test_player != test_alexa

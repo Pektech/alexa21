@@ -1,6 +1,6 @@
 import pytest
 
-from lambda2.code.alexa.speech_functions import *
+from lambda2.code.alexa.speech_functions import build_hand
 
 
 def test_build_hand():

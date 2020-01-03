@@ -120,14 +120,13 @@ class Hand:
         return self
 
 
-# dont think chips really need to be an object for this
-# class Chips:
-#     def __init__(self):
-#         self.total = 100
-#         self.bet = 0
-#
-#     def win_bet(self):
-#         self.total += self.bet
-#
-#     def lose_bet(self):
-#         self.total -= self.bet
+class Chips:
+    def __init__(self):
+        self.total = 100
+        self.bet = 0
+
+    def win_bet(self):
+        self.total += self.bet
+
+    def lose_bet(self):
+        self.total -= self.bet
