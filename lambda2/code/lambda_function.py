@@ -91,7 +91,7 @@ def start_game(handler_input):
     game_session_attr = handler_input.attributes_manager.session_attributes
     game_session_attr["GAME_STATE"] = "RUNNING"
     # player_hand = game_session_attr["PLAYER"]
-    gm.game_state = "Running"
+    gm.game_state.state = "Playing"
     p_hand = gm.player_hand.hand_held()
     a_hand = gm.alexa_hand.holding()
     print(gm.alexa_hand.holding())
@@ -230,6 +230,28 @@ def stand_handler(handler_input):
         )
     # if alexa higher than player, alexa wins, subtract bet, draw new cards
     # if draw then deal new cards
+
+
+@sb.request_handler(can_handle_func=is_intent_name("AMAZON.YesIntent"))
+def yes(handler_input):
+    if gm.game_state.state == "Playing":
+        # clear hands
+        gm.player_hand.clear_hand()
+        gm.alexa_hand.clear_hand()
+        # add new card to player, alexa, player , alexa
+        cards.Hand.new_deal(gm.player_hand, gm.alexa_hand, gm.deck)
+        p_hand = gm.player_hand.hand_held()
+        a_hand = gm.alexa_hand.holding()
+        print(gm.alexa_hand.holding())
+        output = f"""okay new round. I'll deal. You have {p_hand}.
+            I have a {a_hand[1][1]} of {a_hand[1][0]} showing. how much would you like to bet?"""
+        # handler_input.response_builder.add_directive(
+        #     DelegateDirective(updated_intent=Intent(name='Betting')))
+        return (
+            handler_input.response_builder.speak(output)
+            .set_should_end_session(False)
+            .response
+        )
 
 
 handler = sb.lambda_handler()

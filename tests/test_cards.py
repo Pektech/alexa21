@@ -184,3 +184,25 @@ def test_lose_bet():
     player_chips.bet = 5
     player_chips.lose_bet()
     assert player_chips.total == 95
+
+
+def test_clear_hand():
+    test_hand = cards.Hand()
+    test_hand.add_cards(cards.Card("Diamonds", "King"))
+    test_hand.add_cards(cards.Card("Hearts", "Ace"))
+    print(test_hand.cards)
+    test_hand.clear_hand()
+    print(test_hand.cards)
+    assert test_hand.cards == []
+
+
+def test_new_deal():
+    test_player, test_alexa = gm.player_hand, gm.alexa_hand
+    deck = gm.deck
+    old_hand_player = test_player.holding()
+    print(test_player.holding())
+    print(test_alexa.holding())
+    cards.Hand.new_deal(test_player, test_alexa, deck)
+    print(test_player.holding())
+    print(test_alexa.holding())
+    assert old_hand_player < test_player.holding()
