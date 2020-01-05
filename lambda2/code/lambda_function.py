@@ -76,6 +76,7 @@ def launch_request_handler(handler_input):
         game_session_attr["PLAYER"] = gm.player_hand.holding()
         game_session_attr["last_speech"] = speech_text
     print(gm.alexa_hand.holding())
+
     return (
         handler_input.response_builder.speak(speech_text)
         .ask(game_session_attr["last_speech"])
@@ -90,7 +91,7 @@ def start_game(handler_input):
     game_session_attr = handler_input.attributes_manager.session_attributes
     game_session_attr["GAME_STATE"] = "RUNNING"
     # player_hand = game_session_attr["PLAYER"]
-
+    gm.game_state = "Running"
     p_hand = gm.player_hand.hand_held()
     a_hand = gm.alexa_hand.holding()
     print(gm.alexa_hand.holding())
@@ -168,9 +169,18 @@ def play_handler(handler_input):
 def stand_handler(handler_input):
     request_id_holder = handler_input.request_envelope.request.request_id
     directive_header = Header(request_id=request_id_holder)
-
+    if game_functions.isbust(gm.player_hand):
+        output = f"""Sorry you bust. My Turn"""
+        speech = SpeakDirective(speech=output)
+        directive_request = SendDirectiveRequest(
+            header=directive_header, directive=speech
+        )
+        directive_service_client = (
+            handler_input.service_client_factory.get_directive_service()
+        )
+        directive_service_client.enqueue(directive_request)
     print(gm.alexa_hand.value)
-    while gm.alexa_hand.value < 17:
+    while gm.alexa_hand.value <= 17 and not game_functions.isbust(gm.alexa_hand):
         gm.alexa_hand.hit(gm.deck)
         current_hand = gm.alexa_hand.hand_held()
 
@@ -185,13 +195,41 @@ def stand_handler(handler_input):
         directive_service_client.enqueue(directive_request)
 
         print(output)
+    # check if alexa has bust
+    if gm.alexa_hand.value > 21:
+        player_chips.win_bet()
+        output = f"I bust so You won. Play again?"
+        return (
+            handler_input.response_builder.speak(output)
+            .set_should_end_session(False)
+            .response
+        )
     # if alexa is less than player, player wins, add winnings, draw new cards
+    if gm.alexa_hand.value < gm.player_hand.value:
+        player_chips.win_bet()
+        output = f"You won. Play again?"
+        return (
+            handler_input.response_builder.speak(output)
+            .set_should_end_session(False)
+            .response
+        )
+    elif gm.alexa_hand.value > gm.player_hand.value:
+        player_chips.lose_bet()
+        output = f"You lost. Play again?"
+        return (
+            handler_input.response_builder.speak(output)
+            .set_should_end_session(False)
+            .response
+        )
+    else:
+        output = f"A draw. Play again?"
+        return (
+            handler_input.response_builder.speak(output)
+            .set_should_end_session(False)
+            .response
+        )
     # if alexa higher than player, alexa wins, subtract bet, draw new cards
     # if draw then deal new cards
-    bust = f"""My cards value is {gm.alexa_hand.value} so I have bust"""
-    handler_input.response_builder.speak(bust)
-
-    return handler_input.response_builder.set_should_end_session(False).response
 
 
 handler = sb.lambda_handler()

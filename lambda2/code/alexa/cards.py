@@ -130,3 +130,8 @@ class Chips:
 
     def lose_bet(self):
         self.total -= self.bet
+
+
+class GameState:
+    def __init__(self):
+        self.state = "Ready"
