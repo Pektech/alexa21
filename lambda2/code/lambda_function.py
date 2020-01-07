@@ -112,16 +112,23 @@ def start_game(handler_input):
 @sb.request_handler(can_handle_func=is_intent_name("Betting"))
 def bet_handler(handler_input):
     # handles that a bet has been set and remembers amount
-    # current_intent gets details about returned intent for checking use .name
-    # .slots etc
-    game_session_attr = handler_input.attributes_manager.session_attributes
+    request_id_holder = handler_input.request_envelope.request.request_id
+    directive_header = Header(request_id=request_id_holder)
     slots = handler_input.request_envelope.request.intent.slots
 
     bet = slots["amount"].value
     player_chips.bet = bet
-    game_session_attr["GAME_STATE"] = "RUNNING"
-    # player_hand = game_session_attr["PLAYER"]
-    alexa_hand_json = game_session_attr["ALEXA"]
+    if not game_functions.can_bet(bet, player_chips):
+        output = f"""Sorry but you do not have enough for that bet.  You have a total of 
+        {player_chips.total}, how much would you like to bet?"""
+        speech = SpeakDirective(speech=output)
+        directive_request = SendDirectiveRequest(
+            header=directive_header, directive=speech
+        )
+        directive_service_client = (
+            handler_input.service_client_factory.get_directive_service()
+        )
+        directive_service_client.enqueue(directive_request)
     p_hand = gm.player_hand.hand_held()
     a_hand = gm.alexa_hand.holding()
     print(a_hand)
@@ -153,8 +160,7 @@ def play_handler(handler_input):
             .response
         )
     else:
-        test = stand_handler(handler_input)
-        return test
+        return stand_handler(handler_input)
         # output = "Sorry you bust. My turn"
         # return (
         #     handler_input.response_builder.speak(output)
@@ -180,7 +186,7 @@ def stand_handler(handler_input):
         )
         directive_service_client.enqueue(directive_request)
     print(gm.alexa_hand.value)
-    while gm.alexa_hand.value <= 17 and not game_functions.isbust(gm.alexa_hand):
+    while game_functions.should_alexa_hit(gm.player_hand, gm.alexa_hand):
         gm.alexa_hand.hit(gm.deck)
         current_hand = gm.alexa_hand.hand_held()
 
@@ -195,15 +201,15 @@ def stand_handler(handler_input):
         directive_service_client.enqueue(directive_request)
 
         print(output)
-    # check if alexa has bust
-    if gm.alexa_hand.value > 21:
-        player_chips.win_bet()
-        output = f"I bust so You won. Play again?"
-        return (
-            handler_input.response_builder.speak(output)
-            .set_should_end_session(False)
-            .response
-        )
+        # check if alexa has bust
+        if gm.alexa_hand.value > 21:
+            player_chips.win_bet()
+            output = f"I bust so You won. Play again?"
+            return (
+                handler_input.response_builder.speak(output)
+                .set_should_end_session(False)
+                .response
+            )
     # if alexa is less than player, player wins, add winnings, draw new cards
     if gm.alexa_hand.value < gm.player_hand.value:
         player_chips.win_bet()
