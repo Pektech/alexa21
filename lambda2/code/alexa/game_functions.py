@@ -30,5 +30,12 @@ def should_alexa_hit(player_hand, alexa_hand):
     )
 
 
+def say_hit_or_stand(player_hand, alexa_hand):
+    if should_alexa_hit(player_hand, alexa_hand):
+        return "Hit"
+    else:
+        return "Stand"
+
+
 def can_bet(bet, player_chips):
     return bet <= player_chips.total

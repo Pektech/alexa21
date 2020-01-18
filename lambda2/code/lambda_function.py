@@ -198,7 +198,8 @@ def stand_handler(handler_input):
     request_id_holder = handler_input.request_envelope.request.request_id
     directive_header = Header(request_id=request_id_holder)
     if game_functions.isbust(gm.player_hand):
-        output = f"""Sorry you bust with a total of {gm.player_hand.value}. My Turn"""
+        output = f"""Sorry you bust with a total of {gm.player_hand.value}. My Turn, I
+have {gm.alexa_hand.hand_held()} for a total of {gm.alexa_hand.value}"""
         speech = SpeakDirective(speech=output)
         directive_request = SendDirectiveRequest(
             header=directive_header, directive=speech
@@ -209,11 +210,20 @@ def stand_handler(handler_input):
         directive_service_client.enqueue(directive_request)
     print("alexa: ", gm.alexa_hand.holding())
     print("player: ", gm.player_hand.holding())
+    hit_or_stand = game_functions.say_hit_or_stand(gm.player_hand, gm.alexa_hand)
+    output = f""" I have {gm.alexa_hand.hand_held()}, for a total of {gm.alexa_hand.value},
+hmm I think I will {hit_or_stand}"""
+    speech = SpeakDirective(speech=output)
+    directive_request = SendDirectiveRequest(header=directive_header, directive=speech)
+    directive_service_client = (
+        handler_input.service_client_factory.get_directive_service()
+    )
+    directive_service_client.enqueue(directive_request)
     while game_functions.should_alexa_hit(gm.player_hand, gm.alexa_hand):
         gm.alexa_hand.hit(gm.deck)
         current_hand = gm.alexa_hand.hand_held()
 
-        output = f""" I have {current_hand}"""
+        output = f""" I have {current_hand}, for a total of {gm.alexa_hand.value}"""
         speech = SpeakDirective(speech=output)
         directive_request = SendDirectiveRequest(
             header=directive_header, directive=speech
@@ -237,7 +247,9 @@ def stand_handler(handler_input):
                 .response
             )
     # if alexa is less than player, player wins, add winnings, draw new cards
-    if gm.alexa_hand.value < gm.player_hand.value:
+    if gm.alexa_hand.value < gm.player_hand.value and not game_functions.isbust(
+        gm.player_hand
+    ):
 
         gm.player_chips.win_bet()
         output = f"You won. Play again?"
@@ -249,9 +261,9 @@ def stand_handler(handler_input):
             .set_should_end_session(False)
             .response
         )
-    elif gm.alexa_hand.value > gm.player_hand.value:
+    elif gm.alexa_hand.value >= gm.player_hand.value:
         gm.player_chips.lose_bet()
-        output = f"You lost. Play again?"
+        output = f"I have a total of {gm.alexa_hand.value} so you lose. Play again?"
         print("alexa: ", gm.alexa_hand.holding())
         print("player: ", gm.player_hand.holding())
         print("chips: ", gm.player_chips.total)
