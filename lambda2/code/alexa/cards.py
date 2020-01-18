@@ -119,6 +119,18 @@ class Hand:
         self.add_cards(Card(card.suit, card.rank))
         return self
 
+    def clear_hand(self):
+        self.cards = []
+        return self
+
+    @staticmethod
+    def new_deal(player_hand, alexa_hand, game_deck):
+        player_hand.hit(game_deck)
+        alexa_hand.hit(game_deck)
+        player_hand.hit(game_deck)
+        alexa_hand.hit(game_deck)
+        return player_hand, alexa_hand
+
 
 class Chips:
     def __init__(self):

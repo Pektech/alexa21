@@ -22,4 +22,20 @@ def player_loses_bet(bet, player_chips):
     return player_chips - bet
 
 
-# just for testing alexa dealing and winning
+def should_alexa_hit(player_hand, alexa_hand):
+    return (
+        21 >= alexa_hand.value
+        and alexa_hand.value < player_hand.value
+        and not isbust(alexa_hand)
+    )
+
+
+def say_hit_or_stand(player_hand, alexa_hand):
+    if should_alexa_hit(player_hand, alexa_hand):
+        return "Hit"
+    else:
+        return "Stand"
+
+
+def can_bet(bet, player_chips):
+    return bet <= player_chips.total
